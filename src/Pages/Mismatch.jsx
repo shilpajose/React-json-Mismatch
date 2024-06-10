@@ -39,6 +39,93 @@ function AdminDashboard() {
     const placement = () => {
         navigate('/admin-table')
     }
+    const [json1, setJson1] = useState(JSON.stringify([
+        { "id": 1, "name": "Alice", "age": 25, "email": "alice@example.com" },
+        { "id": 2, "name": "Bob", "age": 30, "email": "bob@example.com" },
+        { "id": 3, "name": "Charlie", "age": 35, "email": "charlie@example.com" },
+        { "id": 4, "name": "David", "age": 40, "email": "david@example.com" },
+        { "id": 5, "name": "Eve", "age": 45, "email": "eve@example.com" },
+        { "id": 6, "name": "Frank", "age": 50, "email": "frank@example.com" },
+        { "id": 7, "name": "Grace", "age": 55, "email": "grace@example.com" },
+        { "id": 8, "name": "Heidi", "age": 60, "email": "heidi@example.com" },
+        { "id": 9, "name": "Ivan", "age": 65, "email": "ivan@example.com" },
+        { "id": 10, "name": "Judy", "age": 70, "email": "judy@example.com" }
+    ], null, 2));
+
+    const [json2, setJson2] = useState(JSON.stringify([
+        { "id": 1, "name": "Alice", "age": 26, "email": "alice_new@example.com" },
+        { "id": 2, "name": "Bob", "age": 30, "email": "bob@example.com" },
+        { "id": 3, "name": "Charlie", "age": 36, "email": "charlie_new@example.com" },
+        { "id": 4, "name": "David", "age": 40, "email": "david@example.com" },
+        { "id": 5, "name": "Eve", "age": 45, "email": "eve_new@example.com" },
+        { "id": 6, "name": "Frank", "age": 51, "email": "frank@example.com" },
+        { "id": 7, "name": "Grace", "age": 55, "email": "grace@example.com" },
+        { "id": 8, "name": "Heidi", "age": 60, "email": "heidi@example.com" },
+        { "id": 9, "name": "Ivan", "age": 66, "email": "ivan_new@example.com" },
+        { "id": 10, "name": "Judy", "age": 70, "email": "judy@example.com" }
+    ], null, 2));
+
+    const [mismatchedData, setMismatchedData] = useState([]);
+    const [error, setError] = useState('');
+
+    const handleCompare = () => {
+        try {
+            const obj1 = JSON.parse(json1);
+            const obj2 = JSON.parse(json2);
+            const mismatches = findMismatches(obj1, obj2);
+            setMismatchedData(mismatches);
+            setError('');
+        } catch (error) {
+            setError('Invalid JSON');
+            setMismatchedData([]);
+        }
+    };
+
+    const findMismatches = (obj1, obj2) => {
+        let mismatches = [];
+        obj1.forEach((item1, index) => {
+            const item2 = obj2[index];
+            for (let key in item1) {
+                if (item1[key] !== item2[key]) {
+                    mismatches.push(`${index}.${key}`);
+                }
+            }
+        });
+        return mismatches;
+    };
+
+    const misMatchTable = (obj1, obj2) => {
+        return (
+            <table className='table table-stripped mt-5' border="1" cellPadding="5">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {obj1.map((item1, index) => {
+                        const item2 = obj2[index];
+                        return (
+                            <tr key={item1.id}>
+                                {Object.keys(item1).map(key => {
+                                    const currentPath = `${index}.${key}`;
+                                    const isMismatch = mismatchedData.includes(currentPath);
+                                    return (
+                                        <td key={key} style={{ color: isMismatch ? 'red' : 'black' }}>
+                                            {item1[key]} / {item2 ? item2[key] : 'N/A'}
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        );
+    };
 
     return (
         <>
@@ -52,7 +139,7 @@ function AdminDashboard() {
                 <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
                 <p className='text-light ms-5'>Welcome<span className='text-warning'>{user}</span></p>
                 {/* <!-- Navbar Search--> */}
-                <div className='ms-5 d-flex' style={{position:'absolute',right:'450px'}}>
+                <div className='ms-5 d-flex' style={{ position: 'absolute', right: '450px' }}>
                     <i className="fa-solid fa-users text-warning ms-5"></i><sup className='text-light'>10</sup>
                     <i class="fa-regular fa-address-card text-warning ms-1"></i><sup className='text-light'>15</sup>
                     <i class="fa-solid fa-laptop text-warning ms-1"></i><sup className='text-light'>20 </sup>
@@ -102,7 +189,7 @@ function AdminDashboard() {
                                         Placements
                                     </a>
                                 </Link>
-                                
+
                             </div>
                         </div>
                         <div class="sb-sidenav-footer">
@@ -114,79 +201,26 @@ function AdminDashboard() {
                 <div id="layoutSidenav_content">
                     <main>
                         <div class="container-fluid px-4">
-                            <h1 class="mt-4">Dashboard</h1>
-                            <ol class="breadcrumb mb-4">
-                                <li class="breadcrumb-item active">Dashboard</li>
-                            </ol>
-                            <div class="row">
-                                <div class="col-xl-3 col-md-6">
-                                    <div class="card bg-primary text-white mb-4">
-                                        <div class="card-body">Placements Data</div>
-                                        <div class="card-footer d-flex align-items-center justify-content-between">
-                                            <a class="small text-white stretched-link" href="#">View Details</a>
-                                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-3 col-md-6">
-                                    <div class="card bg-warning text-white mb-4">
-                                        <div class="card-body">Users Data</div>
-                                        <div class="card-footer d-flex align-items-center justify-content-between">
-                                            <a class="small text-white stretched-link" href="#">View Details</a>
-                                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-3 col-md-6">
-                                    <div class="card bg-success text-white mb-4">
-                                        <div class="card-body">Job Applications</div>
-                                        <div class="card-footer d-flex align-items-center justify-content-between">
-                                            <a class="small text-white stretched-link" href="#">View Details</a>
-                                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-3 col-md-6">
-                                    <div class="card bg-danger text-white mb-4">
-                                        <div class="card-body">All Data</div>
-                                        <div class="card-footer d-flex align-items-center justify-content-between">
-                                            <a class="small text-white stretched-link" href="#">View Details</a>
-                                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-xl-6">
-                                    <div class="card mb-4">
-                                        <div class="card-header">
-                                            <i class="fas fa-chart-area me-1"></i>
-                                            Area Chart Example
-                                        </div>
-                                        <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas>
-                                            <img src="https://www.datapine.com/blog/wp-content/uploads/2023/04/area-chart-cash-burn-rate.png" alt="" style={{ height: '250px' }} />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-6">
-                                    <div class="card mb-4">
-                                        <div class="card-header">
-                                            <i class="fas fa-chart-bar me-1"></i>
-                                            Bar Chart Example
-                                        </div>
-                                        <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas>
-                                            <img src="https://cdn.sanity.io/images/599r6htc/localized/5ad851c14fe712b1789e645bf5f187c1ea9679f2-1108x1108.png?w=1200&q=70&fit=max&auto=format" alt="" style={{ height: '250px' }} /></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <i class="fas fa-table me-1"></i>
-                                    All Placements
-                                </div>
-                               
-                                <div class="card-body">
-                                   
+                            <h3 className='text-center mt-5 text-danger'>Check Mismatch Data</h3>
+                            <div className='container text-center mt-5'>
+                                <textarea className='me-5'
+                                    rows="10"
+                                    cols="30"
+                                    value={json1}
+                                    onChange={(e) => setJson1(e.target.value)}
+                                    placeholder="Enter first JSON"
+                                ></textarea>
+                                <textarea
+                                    rows="10"
+                                    cols="30"
+                                    value={json2}
+                                    onChange={(e) => setJson2(e.target.value)}
+                                    placeholder="Enter second JSON"
+                                ></textarea>
+                                <button className='btn btn-success ms-5' onClick={handleCompare}>Compare</button>
+                                {error && <p style={{ color: 'red' }}>{error}</p>}
+                                <div className='text-center'>
+                                    {!error && misMatchTable(JSON.parse(json1), JSON.parse(json2))}
                                 </div>
                             </div>
                         </div>
@@ -205,6 +239,7 @@ function AdminDashboard() {
                     </footer>
                 </div>
             </div>
+
 
         </>
     )
